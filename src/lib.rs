@@ -29,18 +29,32 @@ mod test {
 
   use super::DerefClosure;
 
-  struct Foo {
-    pub xs: Vec<i32>,
+  #[test]
+  fn simple() {
+    struct Foo {
+      x: i32,
+    }
+
+    let foo = Rc::new(Foo { x: 3 });
+    let x = {
+      let foo = foo.clone();
+      DerefClosure(move || &foo.deref().x)
+    };
+    assert_eq!(*x, 3);
   }
 
   #[test]
-  fn simple() {
+  fn vec() {
+    struct Foo {
+      xs: Vec<i32>,
+    }
+
     let foo = Rc::new(Foo { xs: vec!(1, 2, 3, 4) });
     let pos = foo.xs.iter().position(|&x| x == 3).unwrap();
     let x = {
       let foo = foo.clone();
       DerefClosure(move || foo.xs.get(pos).unwrap())
     };
-    assert_eq!(*x.deref(), 3);
+    assert_eq!(*x, 3);
   }
 }
